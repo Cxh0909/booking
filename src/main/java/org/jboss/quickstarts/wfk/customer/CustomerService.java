@@ -1,5 +1,6 @@
 package org.jboss.quickstarts.wfk.customer;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.Dependent;
@@ -7,18 +8,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
 
-import org.jboss.quickstarts.wfk.area.Area;
-import org.jboss.quickstarts.wfk.area.AreaService;
-import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
-import org.jboss.quickstarts.wfk.contact.Contact;
-import org.jboss.quickstarts.wfk.contact.ContactRepository;
-import org.jboss.quickstarts.wfk.contact.ContactValidator;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 @Dependent
 public class CustomerService {
@@ -38,7 +30,7 @@ public class CustomerService {
         client = new ResteasyClientBuilder().build();
     }
     
-    Customer create(Customer customer) throws ConstraintViolationException, ValidationException, Exception {
+    public Customer create(Customer customer) throws ConstraintViolationException, ValidationException, Exception {
         log.info("CustomerService.create() - Creating " + customer.getFirstName() + " " + customer.getLastName());
         
         // Check to make sure the data fits with the parameters in the Customer model and passes validation.
@@ -46,6 +38,28 @@ public class CustomerService {
 
         // Write the contact to the database.
         return crud.create(customer);
+    }
+    
+    Customer findById(Long id) {
+        return crud.findById(id);
+    }
+    
+	List<Customer> findAllOrderedById() {
+		return crud.findAllOrderedById();
+	}
+
+    Customer delete(Customer customer) throws Exception {
+        log.info("delete() - Deleting " + customer.toString());
+
+        Customer deletedCustomer = null;
+
+        if (customer.getId() != null) {
+            deletedCustomer = crud.delete(customer);
+        } else {
+            log.info("delete() - No ID was found so can't Delete.");
+        }
+
+        return deletedCustomer;
     }
 
 }

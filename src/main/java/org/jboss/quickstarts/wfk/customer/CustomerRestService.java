@@ -1,6 +1,7 @@
 package org.jboss.quickstarts.wfk.customer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -10,15 +11,16 @@ import javax.inject.Named;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
-import org.jboss.quickstarts.wfk.contact.Contact;
-import org.jboss.quickstarts.wfk.contact.ContactService;
 import org.jboss.quickstarts.wfk.contact.UniqueEmailException;
 import org.jboss.quickstarts.wfk.util.RestServiceException;
 
@@ -44,12 +46,6 @@ public class CustomerRestService {
 	@SuppressWarnings("unused")
     @POST
     @ApiOperation(value = "Add a new Contact to the database")
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Customer created successfully."),
-            @ApiResponse(code = 400, message = "Invalid Customer supplied in request body"),
-            @ApiResponse(code = 409, message = "Customer supplied in request body conflicts with an existing Customer"),
-            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
-    })
     public Response createCustomer(
             @ApiParam(value = "JSON representation of Customer object to be added to the database", required = true)
             Customer customer) {
@@ -94,5 +90,50 @@ public class CustomerRestService {
 
         log.info("createCustomer completed. Contact = " + customer.toString());
         return builder.build();
+    }
+	
+	@DELETE
+    @Path("/{id:[0-9]+}")
+    @ApiOperation(value = "Delete a Customer from the database")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "The customer has been successfully deleted"),
+            @ApiResponse(code = 400, message = "Invalid Customer id supplied"),
+            @ApiResponse(code = 404, message = "Customer with id not found"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response deleteCustomer(
+            @ApiParam(value = "Id of Customer to be deleted", allowableValues = "range[0, infinity]", required = true)
+            @PathParam("id")
+            long id) {
+
+        Response.ResponseBuilder builder;
+
+        Customer customer = service.findById(id);
+        if (customer == null) {
+            // Verify that the customer exists. Return 404, if not present.
+            throw new RestServiceException("No Customer with the id " + id + " was found!", Response.Status.NOT_FOUND);
+        }
+
+        try {
+            service.delete(customer);
+
+            builder = Response.noContent();
+
+        } catch (Exception e) {
+            // Handle generic exceptions
+            throw new RestServiceException(e);
+        }
+        log.info("deleteCustomer completed. Customer = " + customer.toString());
+        return builder.build();
+    }
+
+    @GET
+    @ApiOperation(value = "Delete a Customer from the database")
+    public Response retrieveAllCustomers() {
+        try {
+            return Response.ok(service.findAllOrderedById()).build();
+        }catch (Exception e) {
+            throw new RestServiceException(e);
+        }
     }
 }

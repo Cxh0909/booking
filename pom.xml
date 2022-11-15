@@ -243,6 +243,12 @@
             <version>28.1-jre</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-narayana-jta-parent</artifactId>
+            <version>3.0.0.Alpha1</version>
+            <type>pom</type>
+        </dependency>
 
         <!-- Optional, but highly recommended -->
         <!-- Arquillian allows you to test enterprise code such as EJBs and Transactional(JTA)

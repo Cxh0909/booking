@@ -1,6 +1,7 @@
 package org.jboss.quickstarts.wfk.Commodity;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -10,15 +11,17 @@ import javax.inject.Named;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
-import org.jboss.quickstarts.wfk.contact.Contact;
-import org.jboss.quickstarts.wfk.contact.ContactService;
 import org.jboss.quickstarts.wfk.contact.UniqueEmailException;
 import org.jboss.quickstarts.wfk.util.RestServiceException;
 
@@ -94,5 +97,63 @@ public class CommodityRestService {
 
         log.info("createCommodity completed. Contact = " + commodity.toString());
         return builder.build();
+    }
+
+    @DELETE
+    @Path("/{id:[0-9]+}")
+    @ApiOperation(value = "Delete a Commodity from the database")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "The commodity has been successfully deleted"),
+            @ApiResponse(code = 400, message = "Invalid Commodity id supplied"),
+            @ApiResponse(code = 404, message = "Commodity with id not found"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response deleteCommodity(
+            @ApiParam(value = "Id of Commodity to be deleted", allowableValues = "range[0, infinity]", required = true)
+            @PathParam("id")
+            long id) {
+
+        Response.ResponseBuilder builder;
+
+        Commodity commodity = service.findById(id);
+        if (commodity == null) {
+            // Verify that the commodity exists. Return 404, if not present.
+            throw new RestServiceException("No Commodity with the id " + id + " was found!", Response.Status.NOT_FOUND);
+        }
+
+        try {
+            service.delete(commodity);
+
+            builder = Response.noContent();
+
+        } catch (Exception e) {
+            // Handle generic exceptions
+            throw new RestServiceException(e);
+        }
+        log.info("deleteCommodity completed. Commodity = " + commodity.toString());
+        return builder.build();
+    }
+
+	@GET
+	@ApiOperation(value = "Fetch all Commoditys", notes = "Returns a JSON array of all stored Commodity objects.")
+	public Response retrieveAllCommoditys() {
+		// Create an empty collection to contain the intersection of Commodity to be
+		// returned
+		List<Commodity> commodities = service.findAllOrderedById();
+		return Response.ok(commodities).build();
+	}
+
+    @GET
+    @Path("/type/{type}")
+    @ApiOperation(value = "Find Commodities by type", notes = "Returns a JSON array of all stored Commodity objects.")
+    public Response retrieveCommoditiesByType(@PathParam("type") CommodityType type) {
+        try {
+            List<Commodity> commodities = service.findByType(type);
+            return Response.ok(commodities).build();
+        }catch (Exception e) {
+            throw new RestServiceException(e);
+        }
+
+
     }
 }

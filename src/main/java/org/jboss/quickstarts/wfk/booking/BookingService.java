@@ -1,5 +1,6 @@
 package org.jboss.quickstarts.wfk.booking;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.Dependent;
@@ -7,18 +8,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
 
-import org.jboss.quickstarts.wfk.area.Area;
-import org.jboss.quickstarts.wfk.area.AreaService;
-import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
-import org.jboss.quickstarts.wfk.contact.Contact;
-import org.jboss.quickstarts.wfk.contact.ContactRepository;
-import org.jboss.quickstarts.wfk.contact.ContactValidator;
+import org.jboss.quickstarts.wfk.Commodity.Commodity;
+import org.jboss.quickstarts.wfk.customer.Customer;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 @Dependent
 public class BookingService {
@@ -38,14 +32,49 @@ public class BookingService {
         client = new ResteasyClientBuilder().build();
     }
     
-    Booking create(Booking booking) throws ConstraintViolationException, ValidationException, Exception {
-        log.info("CommodityService.create() - Creating " + booking.getId());
+    Booking create(Long customerId, Long commodityId) throws Exception {
+        log.info("CommodityService.create() - Creating customerId = " + customerId + "commodityId = " + commodityId);
         
-        // Check to make sure the data fits with the parameters in the Commodity model and passes validation.
-        validator.validateBooking(booking);
+        Booking booking = new Booking();
+        booking.setBookingStatus(BookingStatus.CREATED);
 
-        // Write the contact to the database.
+        Customer customer = new Customer();
+        customer.setId(customerId);
+        booking.setCustomer(customer);
+
+        Commodity commodity = new Commodity();
+        commodity.setId(commodityId);
+        booking.setCommodity(commodity);
+
+		// Write the booking to the database.
         return crud.create(booking);
     }
+
+	Booking update(Booking booking) throws Exception {
+		log.info("BookingService.update() - Updating " + booking.getId() + " " + booking.getBookingStatus());
+
+		// Check to make sure the data fits with the parameters in the Booking model and
+		// passes validation.
+		validator.validateBooking(booking);
+
+		// Either update the booking or add it if it can't be found.
+		return crud.update(booking);
+	}
+
+    public Booking cancelById(Long id) throws Exception {
+        log.info("BookingService.cancelById() - Canceling " + id);
+        Booking booking = new Booking();
+        booking.setId(id);
+        booking.setBookingStatus(BookingStatus.CANCELED);
+        return crud.update(booking);
+    }
+
+	public Booking findById(Long id) {
+		return crud.findById(id);
+	}
+
+	List<Booking> findAllOrderedById() {
+		return crud.findAllOrderedById();
+	}
 
 }
