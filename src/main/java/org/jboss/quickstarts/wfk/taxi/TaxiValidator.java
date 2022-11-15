@@ -1,4 +1,4 @@
-package org.jboss.quickstarts.wfk.Commodity;
+package org.jboss.quickstarts.wfk.taxi;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,21 +8,19 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
+import org.jboss.quickstarts.wfk.taxi.Taxi;
+import org.jboss.quickstarts.wfk.taxi.TaxiRepository;
 
-import org.jboss.quickstarts.wfk.contact.Contact;
-import org.jboss.quickstarts.wfk.contact.ContactRepository;
-import org.jboss.quickstarts.wfk.contact.UniqueEmailException;
-
-public class CommodityValidator {
+public class TaxiValidator {
 	@Inject
     private Validator validator;
 
     @Inject
-    private CommodityRepository crud;
+    private TaxiRepository crud;
     
-    void validateCommodity(Commodity commodity)throws ConstraintViolationException, ValidationException {
+    void validateTaxi(Taxi taxi)throws ConstraintViolationException, ValidationException {
         // Create a bean validator and check for issues.
-        Set<ConstraintViolation<Commodity>> violations = validator.validate(commodity);
+        Set<ConstraintViolation<Taxi>> violations = validator.validate(taxi);
 
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));

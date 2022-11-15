@@ -23,11 +23,11 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import org.jboss.quickstarts.wfk.Commodity.CommodityRestService;
 import org.jboss.quickstarts.wfk.booking.BookingRestService;
 import org.jboss.quickstarts.wfk.contact.ContactRestService;
 import org.jboss.quickstarts.wfk.customer.CustomerRestService;
 import org.jboss.quickstarts.wfk.guestbooking.GuestBookingRestService;
+import org.jboss.quickstarts.wfk.taxi.TaxiRestService;
 import org.jboss.quickstarts.wfk.util.JacksonConfig;
 import org.jboss.quickstarts.wfk.util.RestServiceExceptionHandler;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
@@ -61,7 +61,7 @@ public class ContactServiceApplication extends Application {
         // "org.jboss.quickstarts.wfk.other"
 		beanConfig.setResourcePackage(
 				"org.jboss.quickstarts.wfk.booking,org.jboss.quickstarts.wfk.customer,org.jboss.quickstarts.wfk"
-                        + ".Commodity,org.jboss.quickstarts.wfk.guestbooking");
+                        + ".taxi,org.jboss.quickstarts.wfk.guestbooking");
         beanConfig.setScan(true);
 
         //Do not edit below
@@ -75,7 +75,7 @@ public class ContactServiceApplication extends Application {
         //Add RESTful resources here as you create them
         services.add(ContactRestService.class);
         services.add(CustomerRestService.class);
-		services.add(CommodityRestService.class);
+		services.add(TaxiRestService.class);
 		services.add(BookingRestService.class);
         services.add(GuestBookingRestService.class);
 

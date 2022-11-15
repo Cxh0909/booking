@@ -56,11 +56,11 @@ public class BookingRestService {
     })
     public Response createBooking(
             @ApiParam(value = "CustomerId of Booking object to be added to the database", required = true)
-            @QueryParam("customerId") Long customerId,
-			@ApiParam(value = "CommodityId of Booking object to be added to the database", required = true) @QueryParam("commodityId") Long commodityId) {
+            Booking booking) {
 
 
-        if (customerId == null || commodityId == null) {
+        if (booking.getCustomer() == null || booking.getCustomer().getId() == null || booking.getTaxi() == null
+				|| booking.getTaxi().getId() == null) {
             throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
         }
 
@@ -68,7 +68,7 @@ public class BookingRestService {
 
         try {
             // Go add the new Booking.
-            Booking booking = service.create(customerId, commodityId);
+            booking = service.create(booking);
 
             // Create a "Resource Created" 201 Response and pass the Booking back in case it is needed.
             builder = Response.status(Response.Status.CREATED).entity(booking);

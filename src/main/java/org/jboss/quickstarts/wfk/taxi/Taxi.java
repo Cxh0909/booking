@@ -1,4 +1,4 @@
-package org.jboss.quickstarts.wfk.Commodity;
+package org.jboss.quickstarts.wfk.taxi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,49 +10,45 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.jboss.quickstarts.wfk.booking.Booking;
 
 @Entity
 @NamedQueries({
-		@NamedQuery(name = Commodity.FIND_ALL, query = "SELECT c FROM Commodity c ORDER BY c.id ASC"),
-		@NamedQuery(name = Commodity.FIND_BY_TYPE, query = "SELECT c FROM Commodity c WHERE commodity_type = :type")
+		@NamedQuery(name = Taxi.FIND_ALL, query = "SELECT c FROM Taxi c ORDER BY c.id ASC"),
+		@NamedQuery(name = Taxi.FIND_BY_TYPE, query = "SELECT c FROM Taxi c WHERE taxi_status = :status")
 })
 @XmlRootElement
 @Table(name = "commodity")
-public class Commodity implements Serializable {
+public class Taxi implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static final String FIND_ALL = "Commodity.findAll";
+	public static final String FIND_ALL = "Taxi.findAll";
 
-	public static final String FIND_BY_TYPE = "Commodity.findByType";
+	public static final String FIND_BY_TYPE = "Taxi.findByType";
 
 	@Id
-	@ApiModelProperty(hidden = true)
     @GeneratedValue(strategy = GenerationType.TABLE)
 	private Long id;
 	
 	@NotNull
-    @Column(name = "commodity_type")
+    @Column(name = "taxi_status")
 	@Enumerated(EnumType.STRING)
-	private CommodityType commodityType;
+	private TaxiStatus taxiStatus;
 
 	@JsonIgnore
 	@ApiModelProperty(hidden = true)
-	@OneToMany(mappedBy = "commodity", cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "taxi", cascade = CascadeType.ALL)
 	private List<Booking> bookings;
 
 	public Long getId() {
@@ -63,12 +59,12 @@ public class Commodity implements Serializable {
 		this.id = id;
 	}
 
-	public CommodityType getCommodityType() {
-		return commodityType;
+	public TaxiStatus getTaxiType() {
+		return taxiStatus;
 	}
 
-	public void setCommodityType(CommodityType commodityType) {
-		this.commodityType = commodityType;
+	public void setTaxiType(TaxiStatus taxiStatus) {
+		this.taxiStatus = taxiStatus;
 	}
 
 	public List<Booking> getBookings() {
@@ -81,9 +77,9 @@ public class Commodity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Commodity{" +
+		return "Taxi{" +
 				"id=" + id +
-				", commodityType=" + commodityType +
+				", taxiType=" + taxiStatus +
 				", bookings=" + bookings +
 				'}';
 	}

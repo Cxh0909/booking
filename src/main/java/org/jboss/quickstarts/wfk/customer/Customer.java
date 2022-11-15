@@ -34,7 +34,6 @@ public class Customer implements Serializable {
 	public static final String FIND_ALL = "Customer.findAll";
 
 	@Id
-	@ApiModelProperty(hidden = true)
     @GeneratedValue(strategy = GenerationType.TABLE)
 	private Long id;
 	

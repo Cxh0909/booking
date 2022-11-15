@@ -6,11 +6,10 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
-import org.jboss.quickstarts.wfk.Commodity.Commodity;
-import org.jboss.quickstarts.wfk.customer.Customer;
+import org.jboss.quickstarts.wfk.taxi.Taxi;
+import org.jboss.quickstarts.wfk.taxi.TaxiService;
+import org.jboss.quickstarts.wfk.taxi.TaxiStatus;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
@@ -21,7 +20,10 @@ public class BookingService {
 
     @Inject
     private BookingValidator validator;
-	
+
+    @Inject
+    private TaxiService taxiService;
+
 	@Inject
     private BookingRepository crud;
 
@@ -32,20 +34,12 @@ public class BookingService {
         client = new ResteasyClientBuilder().build();
     }
     
-    Booking create(Long customerId, Long commodityId) throws Exception {
-        log.info("CommodityService.create() - Creating customerId = " + customerId + "commodityId = " + commodityId);
-        
-        Booking booking = new Booking();
+    public Booking create(Booking booking) throws Exception {
+        log.info("TaxiService.create() - Creating " + booking.toString());
         booking.setBookingStatus(BookingStatus.CREATED);
-
-        Customer customer = new Customer();
-        customer.setId(customerId);
-        booking.setCustomer(customer);
-
-        Commodity commodity = new Commodity();
-        commodity.setId(commodityId);
-        booking.setCommodity(commodity);
-
+        Taxi taxi = taxiService.pickAFreeTaxi();
+        taxi.setTaxiType(TaxiStatus.BUSY);
+        booking.setTaxi(taxi);
 		// Write the booking to the database.
         return crud.create(booking);
     }

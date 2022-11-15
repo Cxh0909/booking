@@ -1,27 +1,25 @@
 package org.jboss.quickstarts.wfk.booking;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.jboss.quickstarts.wfk.Commodity.Commodity;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.jboss.quickstarts.wfk.customer.Customer;
+import org.jboss.quickstarts.wfk.taxi.Taxi;
 
 @Entity
 @NamedQueries({ @NamedQuery(name = Booking.FIND_ALL, query = "SELECT b FROM Booking b ORDER BY b.id ASC"), })
@@ -43,10 +41,12 @@ public class Booking implements Serializable {
 	private BookingStatus bookingStatus = BookingStatus.CREATED;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Customer customer;
 
 	@ManyToOne
-	private Commodity commodity;
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Taxi taxi;
 
 	public Long getId() {
 		return id;
@@ -72,12 +72,12 @@ public class Booking implements Serializable {
 		this.customer = customer;
 	}
 
-	public Commodity getCommodity() {
-		return commodity;
+	public Taxi getTaxi() {
+		return taxi;
 	}
 
-	public void setCommodity(Commodity commodity) {
-		this.commodity = commodity;
+	public void setTaxi(Taxi taxi) {
+		this.taxi = taxi;
 	}
 
 	@Override

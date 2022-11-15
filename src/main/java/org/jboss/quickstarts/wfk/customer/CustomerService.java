@@ -30,17 +30,17 @@ public class CustomerService {
         client = new ResteasyClientBuilder().build();
     }
     
-    public Customer create(Customer customer) throws ConstraintViolationException, ValidationException, Exception {
+    public Customer create(Customer customer) throws Exception {
         log.info("CustomerService.create() - Creating " + customer.getFirstName() + " " + customer.getLastName());
         
         // Check to make sure the data fits with the parameters in the Customer model and passes validation.
         validator.validateCustomer(customer);
-
+        customer.setId(null);
         // Write the contact to the database.
         return crud.create(customer);
     }
     
-    Customer findById(Long id) {
+    public Customer findById(Long id) {
         return crud.findById(id);
     }
     

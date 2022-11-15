@@ -19,7 +19,6 @@ public class CustomerRepository {
 
     Customer create(Customer customer) throws ConstraintViolationException, ValidationException, Exception {
         log.info("CustomerRepository.create() - Creating " + customer.getFirstName() + " " + customer.getLastName());
-
         // Write the contact to the database.
         em.persist(customer);
 

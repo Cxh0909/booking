@@ -1,4 +1,4 @@
-package org.jboss.quickstarts.wfk.Commodity;
+package org.jboss.quickstarts.wfk.taxi;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +17,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -31,45 +30,45 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Path("/commodities")
+@Path("/taxis")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/commodities", description = "Operations about commodities")
+@Api(value = "/taxis", description = "Operations about commodities")
 @Stateless
-public class CommodityRestService {
+public class TaxiRestService {
 	
 	@Inject
     private @Named("logger") Logger log;
     
     @Inject
-    private CommodityService service;
+    private TaxiService service;
 	
 	@SuppressWarnings("unused")
     @POST
-    @ApiOperation(value = "Add a new Commodity to the database")
+    @ApiOperation(value = "Add a new Taxi to the database")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Commodity created successfully."),
-            @ApiResponse(code = 400, message = "Invalid Commodity supplied in request body"),
-            @ApiResponse(code = 409, message = "Commodity supplied in request body conflicts with an existing Commodity"),
+            @ApiResponse(code = 201, message = "Taxi created successfully."),
+            @ApiResponse(code = 400, message = "Invalid Taxi supplied in request body"),
+            @ApiResponse(code = 409, message = "Taxi supplied in request body conflicts with an existing Taxi"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
-    public Response createCommodity(
-            @ApiParam(value = "JSON representation of Commodity object to be added to the database", required = true)
-            Commodity commodity) {
+    public Response createTaxi(
+            @ApiParam(value = "JSON representation of Taxi object to be added to the database", required = true)
+            Taxi taxi) {
 
 
-        if (commodity == null) {
+        if (taxi == null) {
             throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
         }
 
         Response.ResponseBuilder builder;
 
         try {
-            // Go add the new Commodity.
-            service.create(commodity);
+            // Go add the new Taxi.
+            service.create(taxi);
 
             // Create a "Resource Created" 201 Response and pass the commodity back in case it is needed.
-            builder = Response.status(Response.Status.CREATED).entity(commodity);
+            builder = Response.status(Response.Status.CREATED).entity(taxi);
 
 
         } catch (ConstraintViolationException ce) {
@@ -95,34 +94,34 @@ public class CommodityRestService {
             throw new RestServiceException(e);
         }
 
-        log.info("createCommodity completed. Contact = " + commodity.toString());
+        log.info("createTaxi completed. Contact = " + taxi.toString());
         return builder.build();
     }
 
     @DELETE
     @Path("/{id:[0-9]+}")
-    @ApiOperation(value = "Delete a Commodity from the database")
+    @ApiOperation(value = "Delete a Taxi from the database")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "The commodity has been successfully deleted"),
-            @ApiResponse(code = 400, message = "Invalid Commodity id supplied"),
-            @ApiResponse(code = 404, message = "Commodity with id not found"),
+            @ApiResponse(code = 400, message = "Invalid Taxi id supplied"),
+            @ApiResponse(code = 404, message = "Taxi with id not found"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
-    public Response deleteCommodity(
-            @ApiParam(value = "Id of Commodity to be deleted", allowableValues = "range[0, infinity]", required = true)
+    public Response deleteTaxi(
+            @ApiParam(value = "Id of Taxi to be deleted", allowableValues = "range[0, infinity]", required = true)
             @PathParam("id")
             long id) {
 
         Response.ResponseBuilder builder;
 
-        Commodity commodity = service.findById(id);
-        if (commodity == null) {
+        Taxi taxi = service.findById(id);
+        if (taxi == null) {
             // Verify that the commodity exists. Return 404, if not present.
-            throw new RestServiceException("No Commodity with the id " + id + " was found!", Response.Status.NOT_FOUND);
+            throw new RestServiceException("No Taxi with the id " + id + " was found!", Response.Status.NOT_FOUND);
         }
 
         try {
-            service.delete(commodity);
+            service.delete(taxi);
 
             builder = Response.noContent();
 
@@ -130,25 +129,25 @@ public class CommodityRestService {
             // Handle generic exceptions
             throw new RestServiceException(e);
         }
-        log.info("deleteCommodity completed. Commodity = " + commodity.toString());
+        log.info("deleteTaxi completed. Taxi = " + taxi.toString());
         return builder.build();
     }
 
 	@GET
-	@ApiOperation(value = "Fetch all Commoditys", notes = "Returns a JSON array of all stored Commodity objects.")
-	public Response retrieveAllCommoditys() {
-		// Create an empty collection to contain the intersection of Commodity to be
+	@ApiOperation(value = "Fetch all Taxis", notes = "Returns a JSON array of all stored Taxi objects.")
+	public Response retrieveAllTaxis() {
+		// Create an empty collection to contain the intersection of Taxi to be
 		// returned
-		List<Commodity> commodities = service.findAllOrderedById();
-		return Response.ok(commodities).build();
+		List<Taxi> taxis = service.findAllOrderedById();
+		return Response.ok(taxis).build();
 	}
 
     @GET
     @Path("/type/{type}")
-    @ApiOperation(value = "Find Commodities by type", notes = "Returns a JSON array of all stored Commodity objects.")
-    public Response retrieveCommoditiesByType(@PathParam("type") CommodityType type) {
+    @ApiOperation(value = "Find Commodities by type", notes = "Returns a JSON array of all stored Taxi objects.")
+    public Response retrieveCommoditiesByType(@PathParam("type") TaxiStatus type) {
         try {
-            List<Commodity> commodities = service.findByType(type);
+            List<Taxi> commodities = service.findByType(type);
             return Response.ok(commodities).build();
         }catch (Exception e) {
             throw new RestServiceException(e);
