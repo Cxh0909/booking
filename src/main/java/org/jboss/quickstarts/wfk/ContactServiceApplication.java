@@ -54,14 +54,14 @@ public class ContactServiceApplication extends Application {
         // We may no longer need to change this
         // beanConfig.setHost("localhost:8080/jboss-contacts-swagger");
         beanConfig.setBasePath("/api");
-        beanConfig.setTitle("JBoss Contacts Swagger");
-        beanConfig.setDescription("JBoss WFK Contacts Swagger Quickstart");
+        beanConfig.setTitle("csc8104 API");
+        beanConfig.setDescription("csc8104 api");
         //Add additional RESTService containing packages here, separated by commas:
         // "org.jboss.quickstarts.wfk.contact," +
         // "org.jboss.quickstarts.wfk.other"
 		beanConfig.setResourcePackage(
 				"org.jboss.quickstarts.wfk.booking,org.jboss.quickstarts.wfk.customer,org.jboss.quickstarts.wfk"
-                        + ".taxi,org.jboss.quickstarts.wfk.guestbooking");
+                        + ".taxi,org.jboss.quickstarts.wfk.guestbooking,org.jboss.quickstarts.wfk.agent");
         beanConfig.setScan(true);
 
         //Do not edit below
