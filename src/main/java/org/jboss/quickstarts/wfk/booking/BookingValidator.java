@@ -27,6 +27,10 @@ public class BookingValidator {
             throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
         }
 
+        if (booking.getCustomer() == null || booking.getCustomer().getId() == null) {
+            throw new NullPointerException("customer's id can't be null");
+        }
+
         LocalDate bookingStartDate = parse(booking.getBookingStartDate());
         LocalDate bookingEndDate = parse(booking.getBookingEndDate());
         if (bookingStartDate == null || bookingEndDate == null) {

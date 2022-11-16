@@ -52,7 +52,13 @@ public class TravelAgentService {
         if (travelInfo.getCommodityType() == CommodityType.TAXI) {
             try {
                 Booking booking = travelInfo.getTaxiBooking();
-                bookingService.create(booking);
+                Booking bookingResp = bookingService.create(booking);
+
+                TravelAgent agent = new TravelAgent();
+                agent.setCommodityType(CommodityType.FLIGHT);
+                agent.setBookingDetail(objectMapper.writeValueAsString(bookingResp));
+                agent.setCustomerId(booking.getCustomer().getId());
+                travelAgentRepository.create(agent);
             } catch (Exception e) {
                 throw new IllegalAccessException("failed to booking");
             }
@@ -80,6 +86,7 @@ public class TravelAgentService {
             try {
                 HotelBooking req = travelInfo.getHotelBooking();
                 long customerId = req.getCustomerId();
+                req.setCustomerId(CUSTOMER_ID_HOTEL);
                 ResteasyWebTarget target = client.target(HOTEL_URL);
                 HotelService hotelService = target.proxy(HotelService.class);
                 HotelBooking resp = hotelService.booking(req);

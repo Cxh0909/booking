@@ -85,6 +85,10 @@ public class BookingRestService {
             }
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
 
+        } catch (NullPointerException e) {
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("customerId", "customerId can't be null");
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
         } catch (DateFormatException e) {
             // Handle the unique constraint violation
             Map<String, String> responseObj = new HashMap<>();

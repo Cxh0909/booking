@@ -87,7 +87,7 @@ public class TravelAgentRestService {
 
     @GET
     @Path("/{id:[0-9]+}")
-    @ApiOperation(value = "Get a single Customer from the database")
+    @ApiOperation(value = "Get a single customer's travel agent record from the database")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "The customer has been successfully deleted"),
             @ApiResponse(code = 400, message = "Invalid Customer id supplied"),
