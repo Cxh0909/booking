@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import org.jboss.quickstarts.wfk.agent.TravelAgentRestService;
 import org.jboss.quickstarts.wfk.booking.BookingRestService;
 import org.jboss.quickstarts.wfk.contact.ContactRestService;
 import org.jboss.quickstarts.wfk.customer.CustomerRestService;
@@ -78,6 +79,7 @@ public class ContactServiceApplication extends Application {
 		services.add(TaxiRestService.class);
 		services.add(BookingRestService.class);
         services.add(GuestBookingRestService.class);
+        services.add(TravelAgentRestService.class);
 
         //Do not edit below
         services.add(RestServiceExceptionHandler.class);
