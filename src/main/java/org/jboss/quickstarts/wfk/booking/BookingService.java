@@ -33,7 +33,7 @@ public class BookingService {
     private BookingRepository bookingRepository;
 
     @Inject
-    private TaxiRepository taxiRepository;
+    private TaxiService taxiService;
 
     @Inject
     private BookingValidator bookingValidator;
@@ -46,22 +46,8 @@ public class BookingService {
 
         log.info("BookingService.create() - Creating " + booking);
         booking.setBookingStatus(BookingStatus.CREATED);
-        List<Taxi> taxis = taxiRepository.findAllOrderedById();
-        LocalDate now = LocalDate.now();
-        Taxi waiting = null;
-        for (Taxi taxi : taxis) {
-            List<Booking> bookings = bookingRepository.findByTaxiId(taxi.getId());
-            long count =  bookings.stream().filter(booking1 -> booking1.getBookingStatus() == BookingStatus.CREATED &&
-                    now.isBefore(Objects.requireNonNull(TimeUtils.parse(booking1.getBookingEndDate())))).count();
-            if (count == 0) {
-                waiting = taxi;
-                break;
-            }
-        }
-        if (waiting == null) {
-            throw new RestServiceException("can't find a free taxi now", Response.Status.NOT_FOUND);
-        }
-        booking.setTaxi(Collections.singletonList(waiting));
+
+        booking.setTaxi(taxiService.pickAFreeTaxi());
 		// Write the booking to the database.
         return bookingRepository.create(booking);
     }

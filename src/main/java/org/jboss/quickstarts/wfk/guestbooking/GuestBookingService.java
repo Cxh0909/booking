@@ -10,9 +10,7 @@ import org.jboss.quickstarts.wfk.customer.CustomerService;
 import org.jboss.quickstarts.wfk.taxi.Taxi;
 import org.jboss.quickstarts.wfk.taxi.TaxiService;
 
-/**
- * @author yu zhang
- */
+
 @Dependent
 public class GuestBookingService {
     @Inject
@@ -35,10 +33,7 @@ public class GuestBookingService {
 
         Booking booking = guestBooking.getBooking();
         booking.setCustomer(customer);
-        List<Taxi> taxi = taxiService.pickAFreeTaxi();
-        if (taxi == null) {
-            return null;
-        }
+        Taxi taxi = taxiService.pickAFreeTaxi();
         booking.setTaxi(taxi);
         return bookingService.create(booking);
     }

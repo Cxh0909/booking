@@ -18,9 +18,6 @@ public class BookingValidator {
 
 	@Inject
     private Validator validator;
-
-    @Inject
-    private BookingRepository crud;
     
     void validateBooking(Booking booking) throws ConstraintViolationException, DateFormatException, DateRangeException {
         // Create a bean validator and check for issues.

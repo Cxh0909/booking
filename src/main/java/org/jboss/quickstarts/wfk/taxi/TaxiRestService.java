@@ -102,14 +102,13 @@ public class TaxiRestService {
     @Path("/{id:[0-9]+}")
     @ApiOperation(value = "Delete a Taxi from the database")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "The commodity has been successfully deleted"),
-            @ApiResponse(code = 404, message = "Taxi with id not found"),
+            @ApiResponse(code = 204, message = "The taxi has been successfully deleted"),
+            @ApiResponse(code = 400, message = "Invalid Taxi id supplied"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
     public Response deleteTaxi(
-            @ApiParam(value = "Id of Taxi to be deleted", allowableValues = "range[0, infinity]", required = true)
-            @PathParam("id")
-            long id) {
+            @ApiParam(value = "Id of Taxi to be deleted", required = true)
+            @PathParam("id") long id) {
         Response.ResponseBuilder builder;
         Taxi taxi = service.findById(id);
         if (taxi == null) {
@@ -126,17 +125,5 @@ public class TaxiRestService {
         }
         log.info("deleteTaxi completed. Taxi = " + taxi);
         return builder.build();
-    }
-
-    @GET
-    @Path("/type/{type}")
-    @ApiOperation(value = "Find Commodities by type", notes = "Returns a JSON array of all stored Taxi objects.")
-    public Response retrieveCommoditiesByType(@PathParam("type") TaxiStatus type) {
-        try {
-            List<Taxi> commodities = service.findByType(type);
-            return Response.ok(commodities).build();
-        }catch (Exception e) {
-            throw new RestServiceException(e);
-        }
     }
 }

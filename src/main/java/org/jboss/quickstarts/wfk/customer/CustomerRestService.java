@@ -112,32 +112,26 @@ public class CustomerRestService {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "The customer has been successfully deleted"),
             @ApiResponse(code = 400, message = "Invalid Customer id supplied"),
-            @ApiResponse(code = 404, message = "Customer with id not found"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
     public Response deleteCustomer(
-            @ApiParam(value = "Id of Customer to be deleted", allowableValues = "range[0, infinity]", required = true)
-            @PathParam("id")
-            long id) {
+            @ApiParam(value = "Id of Customer to be deleted", required = true)
+            @PathParam("id") long id) {
 
         Response.ResponseBuilder builder;
-
         Customer customer = service.findById(id);
         if (customer == null) {
             // Verify that the customer exists. Return 404, if not present.
             throw new RestServiceException("No Customer with the id " + id + " was found!", Response.Status.NOT_FOUND);
         }
-
         try {
             service.delete(customer);
-
             builder = Response.noContent();
-
         } catch (Exception e) {
             // Handle generic exceptions
             throw new RestServiceException(e);
         }
-        log.info("deleteCustomer completed. Customer = " + customer.toString());
+        log.info("deleteCustomer completed. Customer = " + customer);
         return builder.build();
     }
 }

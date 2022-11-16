@@ -1,4 +1,4 @@
-package org.jboss.quickstarts.wfk.agent;
+package org.jboss.quickstarts.wfk.agent.flight;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -7,13 +7,12 @@ import javax.ws.rs.core.MediaType;
 import org.jboss.quickstarts.wfk.booking.Booking;
 import org.jboss.quickstarts.wfk.guestbooking.GuestBooking;
 
-/**
- * @author yu zhang
- */
+
 @Path("/flights")
 @Produces(MediaType.APPLICATION_JSON)
-public interface FlightRestClient {
+public interface FlightService {
 
     @POST
-    Booking create(GuestBooking booking);
+    @Path("/records")
+    void create(FlightBookingRequest requst);
 }

@@ -1,12 +1,15 @@
 package org.jboss.quickstarts.wfk.agent;
 
-/**
- * @author yu zhang
- */
+import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
+
+
 public class TravelInfo {
+    @NotNull
     private CommodityType commodityType;
 
-    private Long customerId;
+    @NotNull
+    private String bookingParams;
 
     public CommodityType getCommodityType() {
         return commodityType;
@@ -16,11 +19,11 @@ public class TravelInfo {
         this.commodityType = commodityType;
     }
 
-    public Long getCustomerId() {
-        return customerId;
+    public String getBookingParams() {
+        return bookingParams;
     }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
+    public void setBookingParams(String bookingParams) {
+        this.bookingParams = bookingParams;
     }
 }

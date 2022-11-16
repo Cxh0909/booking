@@ -61,7 +61,7 @@ public class Booking implements Serializable {
 
 	@ManyToOne
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	private List<Taxi> taxi;
+	private Taxi taxi;
 
 	public Long getId() {
 		return id;
@@ -103,11 +103,11 @@ public class Booking implements Serializable {
 		this.customer = customer;
 	}
 
-	public List<Taxi> getTaxi() {
+	public Taxi getTaxi() {
 		return taxi;
 	}
 
-	public void setTaxi(List<Taxi> taxi) {
+	public void setTaxi(Taxi taxi) {
 		this.taxi = taxi;
 	}
 

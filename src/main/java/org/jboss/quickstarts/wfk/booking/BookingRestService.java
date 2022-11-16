@@ -147,6 +147,13 @@ public class BookingRestService {
     @PUT
     @Path("/{id:[0-9]+}")
     @ApiOperation(value = "Update a Booking in the database")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Update a booking successfully"),
+            @ApiResponse(code = 400, message = "Invalid Booking supplied in request body"),
+            @ApiResponse(code = 409, message = "Booking details supplied in request body conflict with another "
+                    + "Booking"),
+            @ApiResponse(code = 404, message = "can't find booking"),
+    })
     public Response updateBooking(
             @ApiParam(value = "Id of Booking to be updated", allowableValues = "range[0, infinity]", required = true) @PathParam("id") long id,
             @ApiParam(value = "JSON representation of Booking object to be updated in the database", required = true) Booking booking) {
@@ -185,15 +192,13 @@ public class BookingRestService {
                 responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
             }
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
-        } catch (UniqueEmailException e) {
-            // Handle the unique constraint violation
+        } catch (DateFormatException e) {
             Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("email", "That email is already used, please use a unique email");
-            throw new RestServiceException("Booking details supplied in request body conflict with another Booking",
-                    responseObj, Response.Status.CONFLICT, e);
-        } catch (InvalidAreaCodeException e) {
+            responseObj.put("date", "That date's format must like 'yyyy-MM-dd HH:mm:ss'");
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
+        } catch (DateRangeException e) {
             Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("area_code", "The telephone area code provided is not recognised, please provide another");
+            responseObj.put("date", "The bookingStartDate must before bookingEndDate");
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
         } catch (Exception e) {
             // Handle generic exceptions

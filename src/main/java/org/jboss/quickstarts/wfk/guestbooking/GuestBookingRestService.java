@@ -32,9 +32,7 @@ import org.jboss.quickstarts.wfk.taxi.TaxiService;
 import org.jboss.quickstarts.wfk.taxi.TaxiStatus;
 import org.jboss.quickstarts.wfk.util.RestServiceException;
 
-/**
- * @author yu zhang
- */
+
 @Path("/guestBookings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +49,7 @@ public class GuestBookingRestService {
     @ApiResponses({
             @ApiResponse(code = 201, message = "GuestBooking created successfully."),
             @ApiResponse(code = 400, message = "Invalid Booking supplied in request body"),
-            @ApiResponse(code = 409, message = "Booking supplied in request body conflicts with an existing Booking"),
+            @ApiResponse(code = 409, message = "Booking start date is after end date"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
     public Response guestBooking(@ApiParam(value = "JSON representation of GuestBooking object to be added to the "

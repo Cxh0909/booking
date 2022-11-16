@@ -25,7 +25,7 @@ public class CustomerService {
     public Customer create(Customer customer) throws ConstraintViolationException, UniqueEmailException,
             UniquePhoneNumberException, Exception {
         customer.setId(null);
-        log.info("CustomerService.create() - Creating " + customer.toString());
+        log.info("CustomerService.create() - Creating " + customer);
         
         // Check to make sure the data fits with the parameters in the Customer model and passes validation.
         validator.validateCustomer(customer);
@@ -44,16 +44,12 @@ public class CustomerService {
 
     Customer delete(Customer customer) throws Exception {
         log.info("delete() - Deleting " + customer.toString());
-
         Customer deletedCustomer = null;
-
         if (customer.getId() != null) {
             deletedCustomer = crud.delete(customer);
         } else {
             log.info("delete() - No ID was found so can't Delete.");
         }
-
         return deletedCustomer;
     }
-
 }

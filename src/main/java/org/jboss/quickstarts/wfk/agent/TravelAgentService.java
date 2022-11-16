@@ -1,61 +1,82 @@
 package org.jboss.quickstarts.wfk.agent;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javax.inject.Inject;
-import org.jboss.quickstarts.wfk.area.AreaService;
+import org.jboss.quickstarts.wfk.agent.flight.FlightBookingRequest;
+import org.jboss.quickstarts.wfk.agent.flight.FlightService;
+import org.jboss.quickstarts.wfk.agent.hotel.HotelBookingRequest;
+import org.jboss.quickstarts.wfk.agent.hotel.HotelService;
 import org.jboss.quickstarts.wfk.booking.Booking;
+import org.jboss.quickstarts.wfk.booking.BookingService;
 import org.jboss.quickstarts.wfk.customer.Customer;
 import org.jboss.quickstarts.wfk.guestbooking.GuestBooking;
 import org.jboss.quickstarts.wfk.guestbooking.GuestBookingService;
+import org.jboss.quickstarts.wfk.util.TimeUtils;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
-/**
- * @author yu zhang
- */
+
 public class TravelAgentService {
 
-    private static final String FLIGHT_URL = "https://csc-8104-sajith-sajeev-retnamma-sajithsajeevruni-dev.apps"
-            + ".sandbox.x8i5.p1.openshiftapps.com/";
+    private static final String HOTEL_URL = "https://csc-8104-abisek-mishra-abisekmishra-dev.apps.sandbox.x8i5.p1.openshiftapps.com/";
+
+    private static final String FLIGHT_URL = "https://csc-8104-abisek-mishra-abisekmishra-dev.apps.sandbox.x8i5.p1"
+            + ".openshiftapps.com/";
     private static final Long CUSTOMER_ID_FLIGHT = 1L;
 
-    private static final Long CUSTOMER_ID_HOTEL = 2L;
+    private static final Long CUSTOMER_ID_HOTEL = 1L;
+
+    private ObjectMapper objectMapper;
+
+    @Inject
+    private BookingService bookingService;
+
+    @Inject
+    private TravelInfoValidator travelInfoValidator;
 
     private ResteasyClient client;
 
     public TravelAgentService() {
         client = new ResteasyClientBuilder().build();
+        objectMapper = new ObjectMapper();
     }
 
-    //    @Inject
-//    private HotelRestClient hotelRestClient;
-//
-//    @Inject
-//    private FlightRestClient flightRestClient;
+    public void create(TravelInfo travelInfo) throws IllegalAccessException {
 
-    @Inject
-    private GuestBookingService bookingService;
-    public Booking create(TravelInfo travelInfo) throws Exception {
-        Customer customer = new Customer();
+        travelInfoValidator.validateTravelInfo(travelInfo);
+
         if (travelInfo.getCommodityType() == CommodityType.TAXI) {
-            customer.setId(travelInfo.getCustomerId());
-            GuestBooking guestBooking = new GuestBooking();
-            guestBooking.setCustomer(customer);
-            return bookingService.create(guestBooking);
+            try {
+                Booking booking = objectMapper.convertValue(travelInfo.getBookingParams(), Booking.class);
+                bookingService.create(booking);
+            } catch (Exception e) {
+                throw new IllegalAccessException("failed to booking");
+            }
         }
         if (travelInfo.getCommodityType() == CommodityType.FLIGHT) {
-            customer.setId(CUSTOMER_ID_FLIGHT);
-            GuestBooking guestBooking = new GuestBooking();
-            guestBooking.setCustomer(customer);
-            ResteasyWebTarget target = client.target("http://ec2-18-119-125-232.us-east-2.compute.amazonaws.com/");
-            AreaService service = target.proxy(FlightRe.class);
-            //return flightRestClient.create(guestBooking);
+            try {
+                FlightBookingRequest req = objectMapper.convertValue(travelInfo.getBookingParams(),
+                        FlightBookingRequest.class);
+                ResteasyWebTarget target = client.target(FLIGHT_URL);
+                FlightService flightService = target.proxy(FlightService.class);
+                flightService.create(req);
+            } catch (Exception e) {
+                throw new IllegalAccessException("failed to booking");
+            }
+
         } else {
-            customer.setId(CUSTOMER_ID_HOTEL);
-            GuestBooking guestBooking = new GuestBooking();
-            guestBooking.setCustomer(customer);
-            //return hotelRestClient.create(guestBooking);
+            try {
+                HotelBookingRequest req = objectMapper.convertValue(travelInfo.getBookingParams(),
+                        HotelBookingRequest.class);
+                ResteasyWebTarget target = client.target(HOTEL_URL);
+                HotelService hotelService = target.proxy(HotelService.class);
+                hotelService.booking(req);
+            } catch (Exception e) {
+                throw new IllegalAccessException("failed to booking");
+            }
         }
-        return null;
     }
 }
