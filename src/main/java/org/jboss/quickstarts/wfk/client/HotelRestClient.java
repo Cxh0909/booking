@@ -8,9 +8,9 @@ import org.jboss.quickstarts.wfk.guestbooking.GuestBooking;
 /**
  * @author yu zhang
  */
-@Path("/hotels")
-public interface HotelRestClient {
-
-    @POST
-    Booking create(GuestBooking booking);
-}
+//@Path("/hotels")
+//public interface HotelRestClient {
+//
+//    @POST
+//    Booking create(GuestBooking booking);
+//}

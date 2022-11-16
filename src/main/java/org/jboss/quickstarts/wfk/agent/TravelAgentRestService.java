@@ -22,7 +22,9 @@ import org.jboss.quickstarts.wfk.util.RestServiceException;
 @Api(value = "/agent", description = "Operations about bookings")
 @Stateless
 public class TravelAgentRestService {
-
+    // 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
+    // oc login --token=sha256~wXOX7ouC7Ds9sNwD47XUzR1xSDYRzoZn-H-i5L08gMA --server=https://api.sandbox.x8i5.p1.openshiftapps.com:6443
+    // oc new-build eap73-openjdk11~"https://github.com/Cxh0909/booking.git" --name=csc8104-build --to=csc8104-build-stream --source-secret=github-secret
     @Inject
     private TravelAgentService travelAgentService;
 
