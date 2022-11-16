@@ -1,7 +1,7 @@
 package org.jboss.quickstarts.wfk.agent.hotel;
 
 
-public class HotelBookingRequest {
+public class HotelBooking {
     private Long customerId;
 
     private Long hotelId;

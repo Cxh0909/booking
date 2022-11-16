@@ -11,5 +11,5 @@ import javax.ws.rs.core.MediaType;
 public interface HotelService {
     @POST
     @Path("/bookings")
-    void booking(HotelBookingRequest request);
+    HotelBooking booking(HotelBooking request);
 }

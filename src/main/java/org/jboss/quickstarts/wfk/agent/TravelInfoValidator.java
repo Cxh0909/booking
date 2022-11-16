@@ -25,5 +25,17 @@ public class TravelInfoValidator {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(new HashSet<ConstraintViolation<?>>(violations));
         }
+
+        if (travelInfo.getCommodityType() == CommodityType.FLIGHT) {
+            if (travelInfo.getFlightBooking() == null || travelInfo.getFlightBooking().getCustomer() == null
+                    || travelInfo.getFlightBooking().getCustomer().getId() == null) {
+                throw new IllegalArgumentException("illegal argument");
+            }
+        }
+        if (travelInfo.getCommodityType() == CommodityType.HOTEL) {
+            if (travelInfo.getHotelBooking() == null || travelInfo.getHotelBooking().getCustomerId() == null) {
+                throw new IllegalArgumentException("illegal argument");
+            }
+        }
     }
 }

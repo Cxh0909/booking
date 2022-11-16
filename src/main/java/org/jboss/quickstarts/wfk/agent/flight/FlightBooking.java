@@ -3,12 +3,12 @@ package org.jboss.quickstarts.wfk.agent.flight;
 /**
  * @author yu zhang
  */
-public class FlightBookingRequest {
+public class FlightBooking {
     private FlightCustomer customer;
 
     private Flight flight;
 
-    private String future;
+    private String date;
 
     public FlightCustomer getCustomer() {
         return customer;
@@ -26,11 +26,11 @@ public class FlightBookingRequest {
         this.flight = flight;
     }
 
-    public String getFuture() {
-        return future;
+    public String getDate() {
+        return date;
     }
 
-    public void setFuture(String future) {
-        this.future = future;
+    public void setDate(String date) {
+        this.date = date;
     }
 }

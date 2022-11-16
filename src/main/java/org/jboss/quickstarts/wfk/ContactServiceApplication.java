@@ -20,12 +20,17 @@ package org.jboss.quickstarts.wfk;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.jboss.quickstarts.wfk.agent.TravelAgentRestService;
+import org.jboss.quickstarts.wfk.booking.Booking;
 import org.jboss.quickstarts.wfk.booking.BookingRestService;
 import org.jboss.quickstarts.wfk.contact.ContactRestService;
+import org.jboss.quickstarts.wfk.customer.Customer;
 import org.jboss.quickstarts.wfk.customer.CustomerRestService;
 import org.jboss.quickstarts.wfk.guestbooking.GuestBookingRestService;
 import org.jboss.quickstarts.wfk.taxi.TaxiRestService;
