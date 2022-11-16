@@ -50,7 +50,7 @@ public class ContactServiceApplication extends Application {
     public ContactServiceApplication() {
         BeanConfig beanConfig = new BeanConfig();
         beanConfig.setVersion("0.1.0");
-        beanConfig.setSchemes(new String[]{"http"});
+        beanConfig.setSchemes(new String[]{"https"});
         // We may no longer need to change this
         // beanConfig.setHost("localhost:8080/jboss-contacts-swagger");
         beanConfig.setBasePath("/api");
