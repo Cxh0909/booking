@@ -14,9 +14,6 @@ import org.jboss.quickstarts.wfk.taxi.TaxiRepository;
 public class TaxiValidator {
 	@Inject
     private Validator validator;
-
-    @Inject
-    private TaxiRepository crud;
     
     void validateTaxi(Taxi taxi)throws ConstraintViolationException, ValidationException {
         // Create a bean validator and check for issues.

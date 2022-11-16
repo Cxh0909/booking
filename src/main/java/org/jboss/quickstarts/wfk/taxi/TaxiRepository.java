@@ -17,10 +17,10 @@ public class TaxiRepository {
     @Inject
     private EntityManager em;
 
-    Taxi create(Taxi taxi) throws ConstraintViolationException, ValidationException, Exception {
-        log.info("TaxiRepository.create() - Creating ");
+    Taxi create(Taxi taxi) throws Exception {
+        log.info("TaxiRepository.create() - Creating " + taxi.toString());
 
-        // Write the commodity to the database.
+        // Write the taxi to the database.
         em.persist(taxi);
 
         return taxi;
@@ -39,7 +39,7 @@ public class TaxiRepository {
         return taxi;
     }
 
-	List<Taxi> findAllOrderedById() {
+	public List<Taxi> findAllOrderedById() {
 		TypedQuery<Taxi> query = em.createNamedQuery(Taxi.FIND_ALL, Taxi.class);
 		return query.getResultList();
 	}

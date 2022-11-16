@@ -1,7 +1,6 @@
 package org.jboss.quickstarts.wfk.customer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -20,8 +19,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
 import org.jboss.quickstarts.wfk.contact.UniqueEmailException;
+import org.jboss.quickstarts.wfk.exception.UniquePhoneNumberException;
 import org.jboss.quickstarts.wfk.util.RestServiceException;
 
 import io.swagger.annotations.Api;
@@ -45,12 +44,15 @@ public class CustomerRestService {
 	
 	@SuppressWarnings("unused")
     @POST
-    @ApiOperation(value = "Add a new Contact to the database")
+    @ApiOperation(value = "Add a new Customer to the database")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "The customer has been successfully created"),
+            @ApiResponse(code = 400, message = "Invalid Customer param supplied"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
     public Response createCustomer(
             @ApiParam(value = "JSON representation of Customer object to be added to the database", required = true)
             Customer customer) {
-
-
         if (customer == null) {
             throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
         }
@@ -63,7 +65,6 @@ public class CustomerRestService {
 
             // Create a "Resource Created" 201 Response and pass the customer back in case it is needed.
             builder = Response.status(Response.Status.CREATED).entity(customer);
-
 
         } catch (ConstraintViolationException ce) {
             //Handle bean validation issues
@@ -79,17 +80,30 @@ public class CustomerRestService {
             Map<String, String> responseObj = new HashMap<>();
             responseObj.put("email", "That email is already used, please use a unique email");
             throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
-        } catch (InvalidAreaCodeException e) {
+        } catch (UniquePhoneNumberException e) {
             Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("area_code", "The telephone area code provided is not recognised, please provide another");
+            responseObj.put("phoneNumber", "That phoneNumber is already used, please use a unique phoneNumber");
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
         } catch (Exception e) {
             // Handle generic exceptions
             throw new RestServiceException(e);
         }
-
-        log.info("createCustomer completed. Contact = " + customer.toString());
+        log.info("createCustomer completed. Customer = " + customer);
         return builder.build();
+    }
+
+    @GET
+    @ApiOperation(value = "List all customers in database, ordered by id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request is processed normally"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response listAllCustomers() {
+        try {
+            return Response.ok(service.findAllOrderedById()).build();
+        }catch (Exception e) {
+            throw new RestServiceException(e);
+        }
     }
 	
 	@DELETE
@@ -125,15 +139,5 @@ public class CustomerRestService {
         }
         log.info("deleteCustomer completed. Customer = " + customer.toString());
         return builder.build();
-    }
-
-    @GET
-    @ApiOperation(value = "Delete a Customer from the database")
-    public Response retrieveAllCustomers() {
-        try {
-            return Response.ok(service.findAllOrderedById()).build();
-        }catch (Exception e) {
-            throw new RestServiceException(e);
-        }
     }
 }

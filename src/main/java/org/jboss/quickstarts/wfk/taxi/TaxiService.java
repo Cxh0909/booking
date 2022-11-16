@@ -31,11 +31,11 @@ public class TaxiService {
     }
     
     Taxi create(Taxi taxi) throws ConstraintViolationException, ValidationException, Exception {
-        log.info("TaxiService.create() - Creating " + taxi.getId() + " " + taxi.getTaxiType());
+        taxi.setId(null);
+        log.info("TaxiService.create() - Creating " + taxi);
         
         // Check to make sure the data fits with the parameters in the Taxi model and passes validation.
         validator.validateTaxi(taxi);
-        taxi.setId(null);
         // Write the contact to the database.
         return crud.create(taxi);
     }
@@ -45,17 +45,9 @@ public class TaxiService {
         return crud.delete(taxi);
     }
 
-	List<Taxi> findAllOrderedById() {
+	public List<Taxi> findAllOrderedById() {
 		return crud.findAllOrderedById();
 	}
-
-    public Taxi pickAFreeTaxi() {
-        List<Taxi> taxis = crud.findByType(TaxiStatus.FREE.name());
-        if (taxis == null || taxis.isEmpty()) {
-            return null;
-        }
-        return taxis.get(0);
-    }
 
     public List<Taxi> findByType(TaxiStatus taxiStatus) {
         return crud.findByType(taxiStatus.name());

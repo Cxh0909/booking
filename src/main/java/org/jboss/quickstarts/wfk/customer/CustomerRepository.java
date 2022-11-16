@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
 public class CustomerRepository {
 	@Inject
@@ -17,19 +15,32 @@ public class CustomerRepository {
     @Inject
     private EntityManager em;
 
-    Customer create(Customer customer) throws ConstraintViolationException, ValidationException, Exception {
-        log.info("CustomerRepository.create() - Creating " + customer.getFirstName() + " " + customer.getLastName());
+    Customer create(Customer customer) throws Exception {
+        log.info("CustomerRepository.create() - Creating " + customer.toString());
         // Write the contact to the database.
         em.persist(customer);
 
         return customer;
+    }
+
+    Customer findByEmail(String email) {
+        TypedQuery<Customer> query = em.createNamedQuery(Customer.FIND_BY_EMAIL, Customer.class).setParameter("email",
+                email);
+        return query.getSingleResult();
+    }
+
+    Customer findByPhoneNumber(String phoneNumber) {
+        TypedQuery<Customer> query = em.createNamedQuery(Customer.FIND_BY_EMAIL, Customer.class).setParameter(
+                "phoneNumber",
+                phoneNumber);
+        return query.getSingleResult();
     }
     
     Customer findById(Long id) {
         return em.find(Customer.class, id);
     }
     
-	List<Customer> findAllOrderedById() {
+	List<Customer> findAllOrderedById() throws Exception {
 		TypedQuery<Customer> query = em.createNamedQuery(Customer.FIND_ALL, Customer.class);
 		return query.getResultList();
 	}

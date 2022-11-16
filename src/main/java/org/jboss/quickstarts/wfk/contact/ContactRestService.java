@@ -75,7 +75,7 @@ public class ContactRestService {
      */
     @GET
     @ApiOperation(value = "Fetch all Contacts", notes = "Returns a JSON array of all stored Contact objects.")
-    public Response retrieveAllContacts(@QueryParam("firstname") String firstname, @QueryParam("lastname") String lastname) {
+    public Response listAllContacts(@QueryParam("firstname") String firstname, @QueryParam("lastname") String lastname) {
         //Create an empty collection to contain the intersection of Contacts to be returned
         List<Contact> contacts;
 

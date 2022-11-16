@@ -24,11 +24,11 @@ import org.jboss.quickstarts.wfk.booking.Booking;
 
 @Entity
 @NamedQueries({
-		@NamedQuery(name = Taxi.FIND_ALL, query = "SELECT c FROM Taxi c ORDER BY c.id ASC"),
+		@NamedQuery(name = Taxi.FIND_ALL, query = "SELECT t FROM Taxi t ORDER BY t.id ASC"),
 		@NamedQuery(name = Taxi.FIND_BY_TYPE, query = "SELECT c FROM Taxi c WHERE taxi_status = :status")
 })
 @XmlRootElement
-@Table(name = "commodity")
+@Table(name = "taxi")
 public class Taxi implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -40,11 +40,10 @@ public class Taxi implements Serializable {
 	@Id
     @GeneratedValue(strategy = GenerationType.TABLE)
 	private Long id;
-	
+
 	@NotNull
-    @Column(name = "taxi_status")
-	@Enumerated(EnumType.STRING)
-	private TaxiStatus taxiStatus;
+	@Column(name = "license_plate_number")
+	private String licensePlateNumber;
 
 	@JsonIgnore
 	@ApiModelProperty(hidden = true)
@@ -59,12 +58,12 @@ public class Taxi implements Serializable {
 		this.id = id;
 	}
 
-	public TaxiStatus getTaxiType() {
-		return taxiStatus;
+	public String getLicensePlateNumber() {
+		return licensePlateNumber;
 	}
 
-	public void setTaxiType(TaxiStatus taxiStatus) {
-		this.taxiStatus = taxiStatus;
+	public void setLicensePlateNumber(String licensePlateNumber) {
+		this.licensePlateNumber = licensePlateNumber;
 	}
 
 	public List<Booking> getBookings() {
@@ -79,7 +78,7 @@ public class Taxi implements Serializable {
 	public String toString() {
 		return "Taxi{" +
 				"id=" + id +
-				", taxiType=" + taxiStatus +
+				", licensePlateNumber=" + licensePlateNumber +
 				", bookings=" + bookings +
 				'}';
 	}

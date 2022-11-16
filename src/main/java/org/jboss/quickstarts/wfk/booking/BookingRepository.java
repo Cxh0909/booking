@@ -17,8 +17,8 @@ public class BookingRepository {
     @Inject
     private EntityManager em;
 
-    Booking create(Booking booking) throws ConstraintViolationException, ValidationException, Exception {
-        log.info("BookingRepository.create() - Creating ");
+    Booking create(Booking booking) throws Exception {
+        log.info("BookingRepository.create() - Creating " + booking.toString());
 
         // Write the booking to the database.
         em.persist(booking);
@@ -26,12 +26,16 @@ public class BookingRepository {
         return booking;
     }
 
-	Booking update(Booking booking) throws ConstraintViolationException, ValidationException, Exception {
-		log.info("BookingRepository.update() - Updating " + booking.getId());
+	List<Booking> findAllOrderedById() {
+		log.info("BookingRepository.findAllOrderedById()");
+		TypedQuery<Booking> query = em.createNamedQuery(Booking.FIND_ALL, Booking.class);
+		return query.getResultList();
+	}
 
+	Booking update(Booking booking) throws Exception {
+		log.info("BookingRepository.update() - Updating " + booking.getId());
 		// Either update the booking or add it if it can't be found.
 		em.merge(booking);
-
 		return booking;
 	}
 
@@ -39,8 +43,10 @@ public class BookingRepository {
 		return em.find(Booking.class, id);
 	}
 
-	List<Booking> findAllOrderedById() {
-		TypedQuery<Booking> query = em.createNamedQuery(Booking.FIND_ALL, Booking.class);
+	public List<Booking> findByTaxiId(Long taxiId) {
+		log.info("BookingRepository.findByTaxiId() - taxiId " + taxiId);
+		TypedQuery<Booking> query = em.createNamedQuery(Booking.FIND_BY_TAXI_ID, Booking.class).setParameter("taxiId"
+				, taxiId);
 		return query.getResultList();
 	}
 }

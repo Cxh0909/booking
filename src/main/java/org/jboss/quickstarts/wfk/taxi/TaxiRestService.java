@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiResponses;
 @Path("/taxis")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/taxis", description = "Operations about commodities")
+@Api(value = "/taxis", description = "Operations about taxis")
 @Stateless
 public class TaxiRestService {
 	
@@ -49,13 +49,11 @@ public class TaxiRestService {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Taxi created successfully."),
             @ApiResponse(code = 400, message = "Invalid Taxi supplied in request body"),
-            @ApiResponse(code = 409, message = "Taxi supplied in request body conflicts with an existing Taxi"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
     public Response createTaxi(
             @ApiParam(value = "JSON representation of Taxi object to be added to the database", required = true)
             Taxi taxi) {
-
 
         if (taxi == null) {
             throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
@@ -67,35 +65,37 @@ public class TaxiRestService {
             // Go add the new Taxi.
             service.create(taxi);
 
-            // Create a "Resource Created" 201 Response and pass the commodity back in case it is needed.
+            // Create a "Resource Created" 201 Response and pass the taxi back in case it is needed.
             builder = Response.status(Response.Status.CREATED).entity(taxi);
-
-
         } catch (ConstraintViolationException ce) {
             //Handle bean validation issues
             Map<String, String> responseObj = new HashMap<>();
-
             for (ConstraintViolation<?> violation : ce.getConstraintViolations()) {
                 responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
             }
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
-
-        } catch (UniqueEmailException e) {
-            // Handle the unique constraint violation
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("email", "That email is already used, please use a unique email");
-            throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
-        } catch (InvalidAreaCodeException e) {
-            Map<String, String> responseObj = new HashMap<>();
-            responseObj.put("area_code", "The telephone area code provided is not recognised, please provide another");
-            throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
         } catch (Exception e) {
             // Handle generic exceptions
             throw new RestServiceException(e);
         }
 
-        log.info("createTaxi completed. Contact = " + taxi.toString());
+        log.info("createTaxi completed. Taxi = " + taxi);
         return builder.build();
+    }
+
+    @GET
+    @ApiOperation(value = "List all taxis in database, ordered by id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request is processed normally"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response listAllTaxis() {
+        try {
+            List<Taxi> taxis = service.findAllOrderedById();
+            return Response.ok(taxis).build();
+        }catch (Exception e){
+            throw new RestServiceException(e);
+        }
     }
 
     @DELETE
@@ -103,7 +103,6 @@ public class TaxiRestService {
     @ApiOperation(value = "Delete a Taxi from the database")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "The commodity has been successfully deleted"),
-            @ApiResponse(code = 400, message = "Invalid Taxi id supplied"),
             @ApiResponse(code = 404, message = "Taxi with id not found"),
             @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
     })
@@ -111,9 +110,7 @@ public class TaxiRestService {
             @ApiParam(value = "Id of Taxi to be deleted", allowableValues = "range[0, infinity]", required = true)
             @PathParam("id")
             long id) {
-
         Response.ResponseBuilder builder;
-
         Taxi taxi = service.findById(id);
         if (taxi == null) {
             // Verify that the commodity exists. Return 404, if not present.
@@ -122,25 +119,14 @@ public class TaxiRestService {
 
         try {
             service.delete(taxi);
-
             builder = Response.noContent();
-
         } catch (Exception e) {
             // Handle generic exceptions
             throw new RestServiceException(e);
         }
-        log.info("deleteTaxi completed. Taxi = " + taxi.toString());
+        log.info("deleteTaxi completed. Taxi = " + taxi);
         return builder.build();
     }
-
-	@GET
-	@ApiOperation(value = "Fetch all Taxis", notes = "Returns a JSON array of all stored Taxi objects.")
-	public Response retrieveAllTaxis() {
-		// Create an empty collection to contain the intersection of Taxi to be
-		// returned
-		List<Taxi> taxis = service.findAllOrderedById();
-		return Response.ok(taxis).build();
-	}
 
     @GET
     @Path("/type/{type}")
@@ -152,7 +138,5 @@ public class TaxiRestService {
         }catch (Exception e) {
             throw new RestServiceException(e);
         }
-
-
     }
 }

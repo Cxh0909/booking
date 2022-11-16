@@ -1,4 +1,4 @@
-package org.jboss.quickstarts.wfk.client;
+package org.jboss.quickstarts.wfk.agent;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

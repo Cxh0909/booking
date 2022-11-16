@@ -1,8 +1,10 @@
 package org.jboss.quickstarts.wfk.booking;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
@@ -22,8 +24,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import jdk.internal.org.jline.utils.Status;
 import org.jboss.quickstarts.wfk.area.InvalidAreaCodeException;
 import org.jboss.quickstarts.wfk.contact.UniqueEmailException;
+import org.jboss.quickstarts.wfk.exception.DateFormatException;
+import org.jboss.quickstarts.wfk.exception.DateRangeException;
 import org.jboss.quickstarts.wfk.util.RestServiceException;
 
 import io.swagger.annotations.Api;
@@ -38,16 +43,16 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "/bookings", description = "Operations about bookings")
 @Stateless
 public class BookingRestService {
-	
-	@Inject
+
+    @Inject
     private @Named("logger") Logger log;
-    
+
     @Inject
     private BookingService service;
-	
-	@SuppressWarnings("unused")
+
+    @SuppressWarnings("unused")
     @POST
-    @ApiOperation(value = "Add a new Booking to the database")
+    @ApiOperation(value = "Booking a taxi, we will pick a taxi which is free now")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Booking created successfully."),
             @ApiResponse(code = 400, message = "Invalid Booking supplied in request body"),
@@ -59,8 +64,7 @@ public class BookingRestService {
             Booking booking) {
 
 
-        if (booking.getCustomer() == null || booking.getCustomer().getId() == null || booking.getTaxi() == null
-				|| booking.getTaxi().getId() == null) {
+        if (booking.getCustomer() == null || booking.getCustomer().getId() == null) {
             throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
         }
 
@@ -72,21 +76,121 @@ public class BookingRestService {
 
             // Create a "Resource Created" 201 Response and pass the Booking back in case it is needed.
             builder = Response.status(Response.Status.CREATED).entity(booking);
-			log.info("createBooking completed. Booking = " + booking.toString());
+            log.info("createBooking completed. Booking = " + booking.toString());
         } catch (ConstraintViolationException ce) {
             //Handle bean validation issues
+            Map<String, String> responseObj = new HashMap<>();
+            for (ConstraintViolation<?> violation : ce.getConstraintViolations()) {
+                responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
+            }
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
+
+        } catch (DateFormatException e) {
+            // Handle the unique constraint violation
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("date", "That date's format must like 'yyyy-MM-dd HH:mm:ss'");
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
+        } catch (DateRangeException e) {
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("date", "The bookingStartDate must before bookingEndDate");
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
+        } catch (RestServiceException e) {
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("taxi", "can't find a free taxi now");
+            throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
+        } catch (Exception e) {
+            // Handle generic exceptions
+            throw new RestServiceException(e);
+        }
+
+        return builder.build();
+    }
+
+    @GET
+    @ApiOperation(value = "List all bookings in database, ordered by id")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "Request is processed normally"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response listAllBookings() {
+        try {
+            List<Booking> bookings = service.findAllOrderedById();
+            return Response.ok(bookings).build();
+        } catch (Exception e) {
+            throw new RestServiceException(e);
+        }
+    }
+
+    @DELETE
+    @Path("/cancelation/{id:[0-9]+}")
+    @ApiOperation(value = "Cancel a Booking")
+    @ApiResponses({
+            @ApiResponse(code = 204, message = "canceling operation is accepted"),
+            @ApiResponse(code = 400, message = "id can't be null"),
+            @ApiResponse(code = 404, message = "the booking to be canceled is not exist"),
+            @ApiResponse(code = 500, message = "An unexpected error occurred whilst processing the request")
+    })
+    public Response cancelABooking(@ApiParam(value = "Id of Booking to be canceled", required = true) @PathParam("id") Long id) {
+        if (id == null) {
+            throw new RestServiceException("Bad Request", Response.Status.BAD_REQUEST);
+        }
+        try {
+            service.cancelById(id);
+            return Response.noContent().build();
+        } catch (RestServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RestServiceException(e);
+        }
+    }
+
+    @PUT
+    @Path("/{id:[0-9]+}")
+    @ApiOperation(value = "Update a Booking in the database")
+    public Response updateBooking(
+            @ApiParam(value = "Id of Booking to be updated", allowableValues = "range[0, infinity]", required = true) @PathParam("id") long id,
+            @ApiParam(value = "JSON representation of Booking object to be updated in the database", required = true) Booking booking) {
+
+        if (booking == null || booking.getId() == null) {
+            throw new RestServiceException("Invalid Booking supplied in request body", Response.Status.BAD_REQUEST);
+        }
+
+        if (booking.getId() != null && booking.getId() != id) {
+            // The client attempted to update the read-only Id. This is not permitted.
+            Map<String, String> responseObj = new HashMap<>();
+            responseObj.put("id", "The Booking ID in the request body must match that of the Booking being updated");
+            throw new RestServiceException("Booking details supplied in request body conflict with another Booking",
+                    responseObj, Response.Status.CONFLICT);
+        }
+
+        if (service.findById(booking.getId()) == null) {
+            // Verify that the booking exists. Return 404, if not present.
+            throw new RestServiceException("No Booking with the id " + id + " was found!", Response.Status.NOT_FOUND);
+        }
+
+        Response.ResponseBuilder builder;
+
+        try {
+            // Apply the changes the Booking.
+            service.update(booking);
+
+            // Create an OK Response and pass the booking back in case it is needed.
+            builder = Response.ok(booking);
+
+        } catch (ConstraintViolationException ce) {
+            // Handle bean validation issues
             Map<String, String> responseObj = new HashMap<>();
 
             for (ConstraintViolation<?> violation : ce.getConstraintViolations()) {
                 responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
             }
             throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
-
         } catch (UniqueEmailException e) {
             // Handle the unique constraint violation
             Map<String, String> responseObj = new HashMap<>();
             responseObj.put("email", "That email is already used, please use a unique email");
-            throw new RestServiceException("Bad Request", responseObj, Response.Status.CONFLICT, e);
+            throw new RestServiceException("Booking details supplied in request body conflict with another Booking",
+                    responseObj, Response.Status.CONFLICT, e);
         } catch (InvalidAreaCodeException e) {
             Map<String, String> responseObj = new HashMap<>();
             responseObj.put("area_code", "The telephone area code provided is not recognised, please provide another");
@@ -96,90 +200,7 @@ public class BookingRestService {
             throw new RestServiceException(e);
         }
 
-
+        log.info("updateBooking completed. Booking = " + booking.toString());
         return builder.build();
     }
-
-	@DELETE
-	@Path("/cancelation/{id:[0-9]+}")
-	@ApiOperation(value = "Cancel a Booking")
-	public Response cancelABooking(@PathParam("id") Long id) {
-		try {
-			Booking booking = service.cancelById(id);
-			return Response.ok(booking).build();
-		}catch (Exception e) {
-			throw new RestServiceException(e);
-		}
-	}
-
-	@PUT
-	@Path("/{id:[0-9]+}")
-	@ApiOperation(value = "Update a Booking in the database")
-	public Response updateBooking(
-			@ApiParam(value = "Id of Booking to be updated", allowableValues = "range[0, infinity]", required = true) @PathParam("id") long id,
-			@ApiParam(value = "JSON representation of Booking object to be updated in the database", required = true) Booking booking) {
-
-		if (booking == null || booking.getId() == null) {
-			throw new RestServiceException("Invalid Booking supplied in request body", Response.Status.BAD_REQUEST);
-		}
-
-		if (booking.getId() != null && booking.getId() != id) {
-			// The client attempted to update the read-only Id. This is not permitted.
-			Map<String, String> responseObj = new HashMap<>();
-			responseObj.put("id", "The Booking ID in the request body must match that of the Booking being updated");
-			throw new RestServiceException("Booking details supplied in request body conflict with another Booking",
-					responseObj, Response.Status.CONFLICT);
-		}
-
-		if (service.findById(booking.getId()) == null) {
-			// Verify that the booking exists. Return 404, if not present.
-			throw new RestServiceException("No Booking with the id " + id + " was found!", Response.Status.NOT_FOUND);
-		}
-
-		Response.ResponseBuilder builder;
-
-		try {
-			// Apply the changes the Booking.
-			service.update(booking);
-
-			// Create an OK Response and pass the booking back in case it is needed.
-			builder = Response.ok(booking);
-
-		} catch (ConstraintViolationException ce) {
-			// Handle bean validation issues
-			Map<String, String> responseObj = new HashMap<>();
-
-			for (ConstraintViolation<?> violation : ce.getConstraintViolations()) {
-				responseObj.put(violation.getPropertyPath().toString(), violation.getMessage());
-			}
-			throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, ce);
-		} catch (UniqueEmailException e) {
-			// Handle the unique constraint violation
-			Map<String, String> responseObj = new HashMap<>();
-			responseObj.put("email", "That email is already used, please use a unique email");
-			throw new RestServiceException("Booking details supplied in request body conflict with another Booking",
-					responseObj, Response.Status.CONFLICT, e);
-		} catch (InvalidAreaCodeException e) {
-			Map<String, String> responseObj = new HashMap<>();
-			responseObj.put("area_code", "The telephone area code provided is not recognised, please provide another");
-			throw new RestServiceException("Bad Request", responseObj, Response.Status.BAD_REQUEST, e);
-		} catch (Exception e) {
-			// Handle generic exceptions
-			throw new RestServiceException(e);
-		}
-
-		log.info("updateBooking completed. Booking = " + booking.toString());
-		return builder.build();
-	}
-
-	@GET
-	@ApiOperation(value = "Fetch all Bookings", notes = "Returns a JSON array of all stored Booking objects.")
-	public Response retrieveAllBookings() {
-		try {
-			List<Booking> bookings = service.findAllOrderedById();
-			return Response.ok(bookings).build();
-		}catch (Exception e) {
-			throw new RestServiceException(e);
-		}
-	}
 }

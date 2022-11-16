@@ -7,10 +7,9 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.jboss.quickstarts.wfk.exception.UniqueEmailException;
+import org.jboss.quickstarts.wfk.exception.UniquePhoneNumberException;
 
 @Dependent
 public class CustomerService {
@@ -22,20 +21,14 @@ public class CustomerService {
 	
 	@Inject
     private CustomerRepository crud;
-
-    private ResteasyClient client;
     
-    public CustomerService() {
-        // Create client service instance to make REST requests to upstream service
-        client = new ResteasyClientBuilder().build();
-    }
-    
-    public Customer create(Customer customer) throws Exception {
-        log.info("CustomerService.create() - Creating " + customer.getFirstName() + " " + customer.getLastName());
+    public Customer create(Customer customer) throws ConstraintViolationException, UniqueEmailException,
+            UniquePhoneNumberException, Exception {
+        customer.setId(null);
+        log.info("CustomerService.create() - Creating " + customer.toString());
         
         // Check to make sure the data fits with the parameters in the Customer model and passes validation.
         validator.validateCustomer(customer);
-        customer.setId(null);
         // Write the contact to the database.
         return crud.create(customer);
     }
@@ -44,7 +37,8 @@ public class CustomerService {
         return crud.findById(id);
     }
     
-	List<Customer> findAllOrderedById() {
+	List<Customer> findAllOrderedById() throws Exception {
+        log.info("CustomerService.findAllOrderedById()");
 		return crud.findAllOrderedById();
 	}
 
